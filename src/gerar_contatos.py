@@ -45,7 +45,7 @@ sobrenomes = [
 # Lista onde serão salvos os contatos
 contatos = []
 
-def gerar_contatos(num: int):
+def gerar_contatos(num: int, cursor):
     for i in range(num):
         nome = nomes[randint(0, 14)]
         ddd = randint(1, 99)
@@ -55,19 +55,10 @@ def gerar_contatos(num: int):
         # nome completo, email, ddd, número de telefone, grupo
         contatos.append([f"{nome} {sobrenomes[randint(0, 19)]}", f"{str.lower(nome)}{randint(0, 999)}@gmail.com", ddd, randint(900000000,999999999), randint(1, 6)])
 
-    # Abre o arquivo contatos_gerados.sql, ou reescreve, caso já exista
-    with open("./sql/contatos_gerados.sql", "w") as arq:
-        arq.write("INSERT INTO contatos (nome, email, ddd, telefone, id_grupo) VALUES\n")
+    # junta os dados em um único insert, e insere tudo de uma vez
+    query_completa = "INSERT INTO contatos (nome, email, ddd, telefone, id_grupo) VALUES "
+    for i in range(num):
+        query_completa += f"\t('{contatos[i][0]}', '{contatos[i][1]}', '{contatos[i][2]}', '{contatos[i][3]}', {contatos[i][4]}){';' if i == num - 1 else ','}"
 
-        # Escreve os dados do contatos
-        for i in range(num):
-            arq.write(f"\t('{contatos[i][0]}', '{contatos[i][1]}', '{contatos[i][2]}', '{contatos[i][3]}', {contatos[i][4]})")
-
-            # Se for o último contato o script irá escrever ';' no final, caso contrário, escreverá ','
-            if i == num - 1:
-                arq.write(f";")
-            else:
-                arq.write(f",\n")
-
-    # Arquivo fechado, com código pronto para ser executado
-    print("arquivo 'contatos_gerados.sql' gerado")
+    cursor.execute(query_completa)
+    print(f"foram inseridos {num} elementos, na tabela contatos\n")

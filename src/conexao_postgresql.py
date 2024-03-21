@@ -7,12 +7,10 @@ def criar_agenda(cursor):
 
 def criar_tabelas(cursor):
     try:
-        with open("./sql/agenda.sql") as query:
-            query.readline()
-            for i in range(3):
-                cursor.execute(query.readline())
-            cursor.close()
-    except Exception:
+        cursor.execute("CREATE TABLE IF NOT EXISTS grupos (id_grupo INT,descricao VARCHAR(64),PRIMARY KEY (id_grupo));")
+        cursor.execute("CREATE TABLE IF NOT EXISTS contatos (id_contato SERIAL,nome VARCHAR(256) NOT NULL,email VARCHAR(256),ddd VARCHAR(2) NOT NULL,telefone VARCHAR(20) NOT NULL,id_grupo INT DEFAULT 0,favorito BOOLEAN DEFAULT FALSE,PRIMARY KEY (id_contato),FOREIGN KEY (id_grupo) REFERENCES grupos (id_grupo));")
+        cursor.execute("INSERT INTO grupos VALUES(0, 'nenhum'),(1, 'amigo'),(2, 'familia'),(3, 'trabalho'),(4, 'escola'),(5, 'faculdade'),(6, 'igreja');")
+    finally:
         cursor.close()
 
 # cria a conexão com a agenda
@@ -36,7 +34,7 @@ def conectar(servidor, porta, usuario, senha):
         return conexao
     
     # se agenda não existe, ele conecta em postgres, cria agenda e tenta novamente a conexão
-    except Exception:
+    except UnicodeDecodeError:
         print("banco de dados agenda não encontrado")
         conexao = pg.connect(
                 database="postgres",
@@ -46,7 +44,7 @@ def conectar(servidor, porta, usuario, senha):
                 password=senha
             )
         conexao.autocommit = True
-        
+            
         print("conectado ao banco de dados postgres")
         criar_agenda(conexao.cursor())
         print("banco de dados agenda criado")

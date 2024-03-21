@@ -19,20 +19,22 @@ if __name__ == "__main__":
         usuario = "postgres"
 
     # se conecta com a agenda
-    conexao = conectar(servidor, porta, usuario, senha)
+    try:
+        conexao = conectar(servidor, porta, usuario, senha)
+    except Exception:
+        print("Erro ao conectar no banco de dados, verifique se os dados de conexão estão corretos")
+        exit()
+
     cursor = conexao.cursor()
 
     # Recebe o número de contatos que irá gerar, e insere na agenda
-    deseja_gerar_contatos = True if input("Deseja gerar contatos?[S/N]: ").upper() == "S" else False
+    deseja_gerar_contatos = True if input("Deseja gerar contatos aleatórios?[S/N]: ").upper() == "S" else False
     if deseja_gerar_contatos:
         num_contatos = int(input("digite o número de contatos que deseja gerar: "))
-        gerar_contatos(num_contatos)
-        with open("./sql/contatos_gerados.sql") as query:
-            cursor.execute(query.read())
-            print(f"foram inseridos {num_contatos} elementos, na tabela contatos\n")
+        gerar_contatos(num_contatos, cursor)
 
     # começa a execução do sistema de comandos
-    print("\nAgenda iniciada, agora você pode interagir com seus contatos através de comandos\n\n")
+    print("\nAgenda iniciada, agora você pode interagir com seus contatos através de comandos\n")
     prog_em_execucao = True
     while prog_em_execucao:
         cmd = input(">> ").split()
@@ -43,3 +45,4 @@ if __name__ == "__main__":
     # fecha a conexão
     cursor.close()
     conexao.close()
+    # fim do programa
