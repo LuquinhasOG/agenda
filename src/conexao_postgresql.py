@@ -5,13 +5,15 @@ def criar_agenda(cursor):
     cursor.execute("CREATE DATABASE agenda;")
     cursor.close()
 
-def criar_tabelas(conexao, cursor):
-    with open("./sql/agenda.sql") as query:
-        query.readline()
-        for i in range(3):
-            cursor.execute(query.readline())
-            conexao.commit()
-        cursor.close
+def criar_tabelas(cursor):
+    try:
+        with open("./sql/agenda.sql") as query:
+            query.readline()
+            for i in range(3):
+                cursor.execute(query.readline())
+            cursor.close()
+    except Exception:
+        cursor.close()
 
 # cria a conexão com a agenda
 def conectar(servidor, porta, usuario, senha):
@@ -25,11 +27,12 @@ def conectar(servidor, porta, usuario, senha):
                 user=usuario,
                 password=senha
             )
+        conexao.autocommit = True
         
         # se a conexão der certo, retorne o objeto de conexão
         print("conectado ao banco de dados agenda")
-        criar_tabelas(conexao, conexao.cursor())
-        print("tabelas grupos e contatos criadas")
+        criar_tabelas(conexao.cursor())
+        print("tabelas grupos e contatos criadas\n")
         return conexao
     
     # se agenda não existe, ele conecta em postgres, cria agenda e tenta novamente a conexão
