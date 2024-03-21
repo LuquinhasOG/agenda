@@ -19,11 +19,11 @@ if __name__ == "__main__":
         usuario = "postgres"
 
     # se conecta com a agenda
+    conexao = None
     try:
         conexao = conectar(servidor, porta, usuario, senha)
     except Exception:
         print("Erro ao conectar no banco de dados, verifique se os dados de conexão estão corretos")
-        exit()
 
     cursor = conexao.cursor()
 
