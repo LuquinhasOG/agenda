@@ -1,5 +1,6 @@
 from .util import visualizar_tabela
 
+
 # verifica o comando e executa, se existir, passando os argumentos do comando
 def executar(cmd, cursor):
     args = cmd[1:len(cmd)]
@@ -12,10 +13,15 @@ def executar(cmd, cursor):
                 cmd_favoritar(args, cursor, True)
             case "desfavoritar":
                 cmd_favoritar(args, cursor, False)
+            case "adicionar":
+                cmd_adicionar(args, cursor)
+            case "apagar":
+                cmd_apagar(args, cursor)
             case "ajuda":
                 pass
             case _:
                 print("Comando não existe, digite 'ajuda' para ver a lista de comandos")
+
 
 # abaixo estão os comandos
 # comando para visualizar informações
@@ -33,9 +39,11 @@ def cmd_ver(args, cursor):
                 if args[1] == "grupo":
                     cursor.execute(f"{select_contatos_padrao} AND c.id_grupo = {args[2]} ORDER BY c.id_contato;")
                 else:
-                    cursor.execute(f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;")
+                    cursor.execute(
+                        f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;")
 
-            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"], cursor.fetchall())
+            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"],
+                              cursor.fetchall())
 
         case "grupos":
             cursor.execute("SELECT * FROM grupos ORDER BY id_grupo;")
@@ -43,10 +51,12 @@ def cmd_ver(args, cursor):
 
         case "favoritos":
             cursor.execute(f"{select_contatos_padrao} AND favorito = TRUE ORDER BY c.id_contato;")
-            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"], cursor.fetchall())
+            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"],
+                              cursor.fetchall())
 
         case _:
             print("As opções de visualização são: contatos, grupos e favoritos")
+
 
 # comando para favoritar e desfavoritar contatos
 def cmd_favoritar(args, cursor, favorito):
@@ -55,3 +65,40 @@ def cmd_favoritar(args, cursor, favorito):
         print("Contato foi adicionado aos favoritos")
     else:
         print("Contato foi retirado dos favoritos")
+
+
+# comando que adiciona contatos e grupos
+def cmd_adicionar(args, cursor):
+    if args[0] == "contato":
+        try:
+            nome = input("Nome completo >> ")
+            email = input("Email(opcional) >> ")
+            ddd, telefone = input("Número de telefone com ddd(exemplo: 45 921340476) >> ").split()
+            grupo = input("Id do grupo >> ")
+
+            cursor.execute(f"INSERT INTO contatos (nome,email,ddd,telefone,id_grupo) VALUES ('{nome}', '{email}',"
+                               f"'{ddd}', '{telefone}', {grupo})")
+            print("Contato adicionado!")
+
+        except Exception:
+            print("Ouve um erro ao criar o contato, verifique se os dados estão corretos")
+
+    elif args[0] == "grupo":
+        descricao = input("Nome do grupo >> ")
+        cursor.execute(f"INSERT INTO grupos (descricao) VALUES ('{descricao}')")
+        print("Grupo adicionado!")
+
+
+# comando para apagar contatos
+def cmd_apagar(args, cursor):
+    try:
+        if len(args) == 2:
+            if args[0] == "contato":
+                cursor.execute(f"DELETE FROM contatos WHERE id_contato = {args[1]}")
+                print("Contato apagado")
+
+            elif args[0] == "grupo":
+                cursor.execute(f"DELETE FROM grupos WHERE id_grupo = {args[1]}")
+                print("Grupo apagado")
+    except Exception:
+        print("Confira se o id está correto!")

@@ -1,7 +1,7 @@
 from src.conexao_postgresql import conectar
 from src.gerar_contatos import gerar_contatos
-from src.comandos import executar
 from src.util import ler_arquivo
+from src.comandos import executar
 from os.path import exists
 
 # aqui começa a execução do código
