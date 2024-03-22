@@ -30,10 +30,10 @@ def cmd_ver(args, cursor):
             elif num_args == 2:
                 cursor.execute(f"{select_contatos_padrao} AND c.id_contato = {args[1]} ORDER BY c.id_contato;")
             elif num_args == 3:
-                if args[1].isnumeric():
-                    cursor.execute(f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;")
-                elif args[1] == "grupo":
+                if args[1] == "grupo":
                     cursor.execute(f"{select_contatos_padrao} AND c.id_grupo = {args[2]} ORDER BY c.id_contato;")
+                else:
+                    cursor.execute(f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;")
 
             visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"], cursor.fetchall())
 
@@ -43,7 +43,7 @@ def cmd_ver(args, cursor):
 
         case "favoritos":
             cursor.execute(f"{select_contatos_padrao} AND favorito = TRUE ORDER BY c.id_contato;")
-            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone"], cursor.fetchall())
+            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"], cursor.fetchall())
 
         case _:
             print("As opções de visualização são: contatos, grupos e favoritos")

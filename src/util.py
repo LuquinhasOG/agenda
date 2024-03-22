@@ -16,3 +16,10 @@ def visualizar_tabela(colunas, elementos):
         for j in range(len(i)):
             print("{coluna:>{tamanho}}".format(coluna=i[j], tamanho=tamanho_colunas[j]), end="  ")
         print()
+
+def ler_arquivo(dir):
+    linhas = []
+    with open(dir) as arquivo:
+        linhas = arquivo.read().split("\n")
+
+    return linhas

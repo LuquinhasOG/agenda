@@ -1,2 +1,5 @@
 /sql/contatos_gerados.sql
 *.pyc
+tasks.txt
+info_login.txt
+.idea

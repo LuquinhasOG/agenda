@@ -19,7 +19,7 @@ def criar_tabelas(cursor):
 def conectar(servidor, porta, usuario, senha):
     # tenta se conectar com a agenda
     try:
-        print("\ntentando conexão com o banco de dados agenda")
+        print("tentando conexão com o banco de dados agenda")
         conexao = pg.connect(
                 database="agenda",
                 host=servidor,
@@ -49,7 +49,7 @@ def conectar(servidor, porta, usuario, senha):
             
         print("conectado ao banco de dados postgres")
         criar_agenda(conexao.cursor())
-        print("banco de dados agenda criado")
+        print("banco de dados agenda criado\n")
         conexao.close()
 
         # tenta conexão novamente
