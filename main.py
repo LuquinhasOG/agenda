@@ -51,12 +51,14 @@ if __name__ == "__main__":
 
     # começa a execução do sistema de comandos
     print("\nAgenda iniciada, agora você pode interagir com seus contatos através de comandos\n")
-    prog_em_execucao = True
-    while prog_em_execucao:
+    cmd_em_exec = True
+    while cmd_em_exec:
         cmd = input(">> ").split()
         
         if cmd:
-            executar(cmd, cursor)
+            cmd_em_exec = executar(cmd, cursor)
+            
+    print("Agenda fechada")
 
     # fecha a conexão
     cursor.close()

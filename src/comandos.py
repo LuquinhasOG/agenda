@@ -1,26 +1,41 @@
 from .util import visualizar_tabela
 
+comandos_em_execucao = True
+
 
 # verifica o comando e executa, se existir, passando os argumentos do comando
 def executar(cmd, cursor):
     args = cmd[1:len(cmd)]
-    if len(args) > 0:
-        # switch case para executar o comando correto
+    # switch case para executar o comando correto
+    try:
         match cmd[0].lower():
             case "ver":
                 cmd_ver(args, cursor)
+
             case "favoritar":
                 cmd_favoritar(args, cursor, True)
+
             case "desfavoritar":
                 cmd_favoritar(args, cursor, False)
+
             case "adicionar":
                 cmd_adicionar(args, cursor)
+
             case "apagar":
                 cmd_apagar(args, cursor)
+
+            case "fechar":
+                return False
+
             case "ajuda":
-                pass
+                cmd_ajuda()
+
             case _:
                 print("Comando não existe, digite 'ajuda' para ver a lista de comandos")
+    except Exception:
+        print("Verifique se a quantidade de argumentos está correta")
+
+    return True
 
 
 # abaixo estão os comandos
@@ -77,7 +92,7 @@ def cmd_adicionar(args, cursor):
             grupo = input("Id do grupo >> ")
 
             cursor.execute(f"INSERT INTO contatos (nome,email,ddd,telefone,id_grupo) VALUES ('{nome}', '{email}',"
-                               f"'{ddd}', '{telefone}', {grupo})")
+                           f"'{ddd}', '{telefone}', {grupo})")
             print("Contato adicionado!")
 
         except Exception:
@@ -102,3 +117,19 @@ def cmd_apagar(args, cursor):
                 print("Grupo apagado")
     except Exception:
         print("Confira se o id está correto!")
+
+
+def cmd_ajuda():
+    print("Comandos disponíveis: ver, favoritar, desfavoritar, adicionar, apagar e fechar")
+    print("ver [contatos/grupos] [id_inicio/grupo] [id_final/id_grupo] \n\t"
+          "id_inicio: id do contatos que quem imprimir \n\t"
+          "grupo: digite grupo para ver contatos que estão em um grupo \n\t"
+          "id_final: digite o id do último contato, caso queira imprimir vários contatos em sequência \n\t"
+          "id_grupo: id do grupo \n")
+    print("favoritar [id_contato] \n\t"
+          "id_contato: id do contato\n")
+    print("desfavoritar [id_contato] \n\t"
+          "id_contato: id do contato\n")
+    print("adicionar [contato/grupo] \n")
+    print("apagar [contato/grupo] [id] \n\t"
+          "id: id do elemento da tabela selecionado\n")
