@@ -17,6 +17,7 @@ def visualizar_tabela(colunas, elementos):
             print("{coluna:>{tamanho}}".format(coluna=i[j], tamanho=tamanho_colunas[j]), end="  ")
         print()
 
+
 def ler_arquivo(dir):
     linhas = []
     with open(dir) as arquivo:

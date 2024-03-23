@@ -24,6 +24,9 @@ def executar(cmd, cursor):
             case "apagar":
                 cmd_apagar(args, cursor)
 
+            case "mudar":
+                cmd_mudar(args, cursor)
+
             case "fechar":
                 return False
 
@@ -119,6 +122,17 @@ def cmd_apagar(args, cursor):
         print("Confira se o id está correto!")
 
 
+def cmd_mudar(args, cursor):
+    try:
+        if args[0] == 'contato':
+            cursor.execute(f"UPDATE contatos SET {args[2]} = '{args[3]}' WHERE id_contato = {args[1]}")
+        elif args[0] == 'grupo':
+            cursor.execute(f"UPDATE grupos SET descricao = '{args[2]}' WHERE id_grupo = {args[1]}")
+
+        print("Informações modificadas")
+    except Exception:
+        print("Não foi possível modificar as informações")
+
 def cmd_ajuda():
     print("Comandos disponíveis: ver, favoritar, desfavoritar, adicionar, apagar e fechar")
     print("ver [contatos/grupos] [id_inicio/grupo] [id_final/id_grupo] \n\t"
@@ -130,6 +144,11 @@ def cmd_ajuda():
           "id_contato: id do contato\n")
     print("desfavoritar [id_contato] \n\t"
           "id_contato: id do contato\n")
-    print("adicionar [contato/grupo] \n")
+    print("adicionar [contato/grupo]\n")
     print("apagar [contato/grupo] [id] \n\t"
           "id: id do elemento da tabela selecionado\n")
+    print("mudar [contato/grupo] [id] [coluna/nova_descrição] [nova_informação] \n\t"
+          "id: id do elemento da tabela selecionado \n\t"
+          "coluna: no caso de mudar contato, é o nome da coluna que deseja modificar \n\t"
+          "nova_informação: no caso de mudar contato, é a nova informação que dejeva mudar da coluna digitada \n\t"
+          "nova_descrição: no caso de mudar grupo, é a nova descrição do grupo \n")
