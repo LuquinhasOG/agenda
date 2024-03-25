@@ -25,7 +25,7 @@ diretório que apresenta os scripts python do programa.
 
 - conexao_postgresql.py: Aprensenta o código que integra Python com PostgreSQL.
 
-- gerar_contatos.py: Gera dados aleatórios para popular a tabela de contatos. O script tem com saída o arquivo 'contatos_gerados.sql', com o código SQL para inserir os dados.
+- gerar_contatos.py: Gera dados aleatórios para popular a tabela de contatos.
 
 - comandos.py: Contém os comandos existentes na seção de comandos
 
