@@ -42,7 +42,7 @@ na execução.
 ## guia de comandos
 
 O uso dos comandos pode ser confuso, principalmente, os comandos 'ver' e 'mudar'.
-Os comandos disponíveis são ver, favoritar, desfavoritar, adicionar, apagar e fechar.
+Os comandos disponíveis são ver, favoritar, desfavoritar, adicionar, apagar, mudar e fechar.
 
 O comando 'ver' pode ser usado de várias formas, para visualizar as informações dos grupos e de todos os contatos, ou apenas
 alguns em específico. Para ver os grupos basta digitar 'ver grupos', para os contatos 'ver contatos', e, para os favoritos 'ver favoritos'.
