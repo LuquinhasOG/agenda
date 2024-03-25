@@ -1,4 +1,11 @@
-from .util import visualizar_tabela
+import math
+
+from .util import visualizar_tabela, escrever_sql
+from datetime import datetime, timedelta
+
+data_atual = datetime.today()
+# nome do arquivo de saída com os comandos sql executados
+arq_saida_aberto = f"./sql/query_{data_atual.day}_{data_atual.month}_{data_atual.year}_{math.ceil(timedelta.total_seconds(data_atual - datetime(2024, 3, 1)))}.sql"
 
 comandos_em_execucao = True
 
@@ -6,28 +13,30 @@ comandos_em_execucao = True
 # verifica o comando e executa, se existir, passando os argumentos do comando
 def executar(cmd, cursor):
     args = cmd[1:len(cmd)]
+    cmd_sql = ""
     # switch case para executar o comando correto
     try:
         match cmd[0].lower():
             case "ver":
-                cmd_ver(args, cursor)
+                cmd_sql = cmd_ver(args, cursor)
 
             case "favoritar":
-                cmd_favoritar(args, cursor, True)
+                cmd_sql = cmd_favoritar(args, cursor, True)
 
             case "desfavoritar":
-                cmd_favoritar(args, cursor, False)
+                cmd_sql = cmd_favoritar(args, cursor, False)
 
             case "adicionar":
-                cmd_adicionar(args, cursor)
+                cmd_sql = cmd_adicionar(args, cursor)
 
             case "apagar":
-                cmd_apagar(args, cursor)
+                cmd_sql = cmd_apagar(args, cursor)
 
             case "mudar":
-                cmd_mudar(args, cursor)
+                cmd_sql = cmd_mudar(args, cursor)
 
             case "fechar":
+                print(f"Os comandos executados foram salvos em {arq_saida_aberto}")
                 return False
 
             case "ajuda":
@@ -38,6 +47,7 @@ def executar(cmd, cursor):
     except Exception:
         print("Verifique se a quantidade de argumentos está correta")
 
+    escrever_sql(arq_saida_aberto, cmd_sql)
     return True
 
 
@@ -45,48 +55,57 @@ def executar(cmd, cursor):
 # comando para visualizar informações
 def cmd_ver(args, cursor):
     num_args = len(args)
+    query = None
     select_contatos_padrao = "SELECT c.id_contato, c.nome, c.email, c.ddd, c.telefone, g.descricao FROM contatos AS c, grupos AS g WHERE c.id_grupo = g.id_grupo"
     # switch case para verificar argumentos
     match args[0].lower():
         case "contatos":
             if num_args == 1:
-                cursor.execute(f"{select_contatos_padrao} ORDER BY c.id_contato;")
+                query = f"{select_contatos_padrao} ORDER BY c.id_contato;"
             elif num_args == 2:
-                cursor.execute(f"{select_contatos_padrao} AND c.id_contato = {args[1]} ORDER BY c.id_contato;")
+                query = f"{select_contatos_padrao} AND c.id_contato = {args[1]} ORDER BY c.id_contato;"
             elif num_args == 3:
                 if args[1] == "grupo":
-                    cursor.execute(f"{select_contatos_padrao} AND c.id_grupo = {args[2]} ORDER BY c.id_contato;")
+                    query = f"{select_contatos_padrao} AND c.id_grupo = {args[2]} ORDER BY c.id_contato;"
                 else:
-                    cursor.execute(
-                        f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;")
+                    query = f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;"
 
+            cursor.execute(query)
             visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"],
                               cursor.fetchall())
 
         case "grupos":
-            cursor.execute("SELECT * FROM grupos ORDER BY id_grupo;")
+            query = "SELECT * FROM grupos ORDER BY id_grupo;"
+            cursor.execute(query)
             visualizar_tabela(["id grupo", "descrição"], cursor.fetchall())
 
         case "favoritos":
-            cursor.execute(f"{select_contatos_padrao} AND favorito = TRUE ORDER BY c.id_contato;")
+            query = f"{select_contatos_padrao} AND favorito = TRUE ORDER BY c.id_contato;"
+            cursor.execute(query)
             visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"],
                               cursor.fetchall())
 
         case _:
             print("As opções de visualização são: contatos, grupos e favoritos")
 
+    return query
+
 
 # comando para favoritar e desfavoritar contatos
 def cmd_favoritar(args, cursor, favorito):
-    cursor.execute(f"UPDATE contatos SET favorito = {favorito} WHERE id_contato = {args[0]}")
+    cmd_sql = f"UPDATE contatos SET favorito = {favorito} WHERE id_contato = {args[0]}"
+    cursor.execute(cmd_sql)
     if favorito:
         print("Contato foi adicionado aos favoritos")
     else:
         print("Contato foi retirado dos favoritos")
 
+    return cmd_sql
+
 
 # comando que adiciona contatos e grupos
 def cmd_adicionar(args, cursor):
+    cmd_insert = ""
     if args[0] == "contato":
         try:
             nome = input("Nome completo >> ")
@@ -94,8 +113,8 @@ def cmd_adicionar(args, cursor):
             ddd, telefone = input("Número de telefone com ddd(exemplo: 45 921340476) >> ").split()
             grupo = input("Id do grupo >> ")
 
-            cursor.execute(f"INSERT INTO contatos (nome,email,ddd,telefone,id_grupo) VALUES ('{nome}', '{email}',"
-                           f"'{ddd}', '{telefone}', {grupo})")
+            cmd_insert = f"INSERT INTO contatos (nome,email,ddd,telefone,id_grupo) VALUES ('{nome}', '{email}', '{ddd}', '{telefone}', {grupo})"
+            cursor.execute(cmd_insert)
             print("Contato adicionado!")
 
         except Exception:
@@ -103,35 +122,49 @@ def cmd_adicionar(args, cursor):
 
     elif args[0] == "grupo":
         descricao = input("Nome do grupo >> ")
-        cursor.execute(f"INSERT INTO grupos (descricao) VALUES ('{descricao}')")
+
+        cmd_insert = f"INSERT INTO grupos (descricao) VALUES ('{descricao}')"
+        cursor.execute(cmd_insert)
         print("Grupo adicionado!")
+
+    return cmd_insert
 
 
 # comando para apagar contatos
 def cmd_apagar(args, cursor):
+    cmd_delete = ""
     try:
         if len(args) == 2:
             if args[0] == "contato":
-                cursor.execute(f"DELETE FROM contatos WHERE id_contato = {args[1]}")
+                cmd_delete = f"DELETE FROM contatos WHERE id_contato = {args[1]}"
+                cursor.execute(cmd_delete)
                 print("Contato apagado")
 
             elif args[0] == "grupo":
-                cursor.execute(f"DELETE FROM grupos WHERE id_grupo = {args[1]}")
+                cmd_delete = f"DELETE FROM grupos WHERE id_grupo = {args[1]}"
+                cursor.execute(cmd_delete)
                 print("Grupo apagado")
     except Exception:
         print("Confira se o id está correto!")
 
+    return cmd_delete
+
 
 def cmd_mudar(args, cursor):
+    cmd_update = ""
     try:
         if args[0] == 'contato':
-            cursor.execute(f"UPDATE contatos SET {args[2]} = '{args[3]}' WHERE id_contato = {args[1]}")
+            cmd_update = f"UPDATE contatos SET {args[2]} = '{args[3]}' WHERE id_contato = {args[1]}"
         elif args[0] == 'grupo':
-            cursor.execute(f"UPDATE grupos SET descricao = '{args[2]}' WHERE id_grupo = {args[1]}")
+            cmd_update = f"UPDATE grupos SET descricao = '{args[2]}' WHERE id_grupo = {args[1]}"
 
+        cursor.execute(cmd_update)
         print("Informações modificadas")
     except Exception:
         print("Não foi possível modificar as informações")
+
+    return cmd_update
+
 
 def cmd_ajuda():
     print("Comandos disponíveis: ver, favoritar, desfavoritar, adicionar, apagar e fechar")

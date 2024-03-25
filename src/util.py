@@ -24,3 +24,9 @@ def ler_arquivo(dir):
         linhas = arquivo.read().split("\n")
 
     return linhas
+
+
+def escrever_sql(nome_arq, query):
+    if query != "":
+        with open(nome_arq, "a") as arq:
+            arq.write(query + "\n")
