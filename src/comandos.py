@@ -47,6 +47,18 @@ def executar(cmd, cursor):
     except Exception:
         print("Verifique se a quantidade de argumentos está correta")
 
+    data = ""
+    if cmd_sql:
+        cursor.execute(cmd_sql)
+        try:
+            data = cursor.fetchall()
+            if args[0] == 'contatos' or args[0] == 'favoritos':
+                visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"], data)
+            elif args[0] == 'grupos':
+                visualizar_tabela(["id grupo", "descrição"], data)
+        except Exception:
+            pass
+
     escrever_sql(arq_saida_aberto, cmd_sql)
     return True
 
@@ -55,7 +67,7 @@ def executar(cmd, cursor):
 # comando para visualizar informações
 def cmd_ver(args, cursor):
     num_args = len(args)
-    query = None
+    query = ""
     select_contatos_padrao = "SELECT c.id_contato, c.nome, c.email, c.ddd, c.telefone, g.descricao FROM contatos AS c, grupos AS g WHERE c.id_grupo = g.id_grupo"
     # switch case para verificar argumentos
     match args[0].lower():
@@ -69,32 +81,20 @@ def cmd_ver(args, cursor):
                     query = f"{select_contatos_padrao} AND c.id_grupo = {args[2]} ORDER BY c.id_contato;"
                 else:
                     query = f"{select_contatos_padrao} AND id_contato BETWEEN {args[1]} AND {args[2]} ORDER BY c.id_contato;"
-
-            cursor.execute(query)
-            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"],
-                              cursor.fetchall())
-
         case "grupos":
             query = "SELECT * FROM grupos ORDER BY id_grupo;"
-            cursor.execute(query)
-            visualizar_tabela(["id grupo", "descrição"], cursor.fetchall())
-
         case "favoritos":
             query = f"{select_contatos_padrao} AND favorito = TRUE ORDER BY c.id_contato;"
-            cursor.execute(query)
-            visualizar_tabela(["id contato", "nome completo", "email", "ddd", "núm. telefone", "grupo"],
-                              cursor.fetchall())
-
         case _:
             print("As opções de visualização são: contatos, grupos e favoritos")
 
+    # retorna a query para executar()
     return query
 
 
 # comando para favoritar e desfavoritar contatos
 def cmd_favoritar(args, cursor, favorito):
     cmd_sql = f"UPDATE contatos SET favorito = {favorito} WHERE id_contato = {args[0]}"
-    cursor.execute(cmd_sql)
     if favorito:
         print("Contato foi adicionado aos favoritos")
     else:
@@ -114,7 +114,6 @@ def cmd_adicionar(args, cursor):
             grupo = input("Id do grupo >> ")
 
             cmd_insert = f"INSERT INTO contatos (nome,email,ddd,telefone,id_grupo) VALUES ('{nome}', '{email}', '{ddd}', '{telefone}', {grupo})"
-            cursor.execute(cmd_insert)
             print("Contato adicionado!")
 
         except Exception:
@@ -122,9 +121,7 @@ def cmd_adicionar(args, cursor):
 
     elif args[0] == "grupo":
         descricao = input("Nome do grupo >> ")
-
         cmd_insert = f"INSERT INTO grupos (descricao) VALUES ('{descricao}')"
-        cursor.execute(cmd_insert)
         print("Grupo adicionado!")
 
     return cmd_insert
@@ -137,12 +134,10 @@ def cmd_apagar(args, cursor):
         if len(args) == 2:
             if args[0] == "contato":
                 cmd_delete = f"DELETE FROM contatos WHERE id_contato = {args[1]}"
-                cursor.execute(cmd_delete)
                 print("Contato apagado")
 
             elif args[0] == "grupo":
                 cmd_delete = f"DELETE FROM grupos WHERE id_grupo = {args[1]}"
-                cursor.execute(cmd_delete)
                 print("Grupo apagado")
     except Exception:
         print("Confira se o id está correto!")
@@ -158,7 +153,6 @@ def cmd_mudar(args, cursor):
         elif args[0] == 'grupo':
             cmd_update = f"UPDATE grupos SET descricao = '{args[2]}' WHERE id_grupo = {args[1]}"
 
-        cursor.execute(cmd_update)
         print("Informações modificadas")
     except Exception:
         print("Não foi possível modificar as informações")
