@@ -1,11 +1,10 @@
-import math
-
 from .util import visualizar_tabela, escrever_sql
+from math import ceil
 from datetime import datetime, timedelta
 
 data_atual = datetime.today()
 # nome do arquivo de saída com os comandos sql executados
-arq_saida_aberto = f"./sql/query_{data_atual.day}_{data_atual.month}_{data_atual.year}_{math.ceil(timedelta.total_seconds(data_atual - datetime(2024, 3, 1)))}.sql"
+arq_saida_aberto = f"./sql/query_{data_atual.day}_{data_atual.month}_{data_atual.year}_{ceil(timedelta.total_seconds(data_atual - datetime(2024, 3, 1)))}.sql"
 
 comandos_em_execucao = True
 
@@ -19,34 +18,28 @@ def executar(cmd, cursor):
         match cmd[0].lower():
             case "ver":
                 cmd_sql = cmd_ver(args, cursor)
-
             case "favoritar":
                 cmd_sql = cmd_favoritar(args, cursor, True)
-
             case "desfavoritar":
                 cmd_sql = cmd_favoritar(args, cursor, False)
-
             case "adicionar":
                 cmd_sql = cmd_adicionar(args, cursor)
-
             case "apagar":
                 cmd_sql = cmd_apagar(args, cursor)
-
             case "mudar":
                 cmd_sql = cmd_mudar(args, cursor)
-
             case "fechar":
+                # retornando False ele para a execução de comandos
                 print(f"Os comandos executados foram salvos em {arq_saida_aberto}")
                 return False
-
             case "ajuda":
                 cmd_ajuda()
-
             case _:
                 print("Comando não existe, digite 'ajuda' para ver a lista de comandos")
     except Exception:
         print("Verifique se a quantidade de argumentos está correta")
 
+    # executa o comando retornado
     data = ""
     if cmd_sql:
         cursor.execute(cmd_sql)
@@ -59,7 +52,9 @@ def executar(cmd, cursor):
         except Exception:
             pass
 
+    # escreve no arquivo de saída
     escrever_sql(arq_saida_aberto, cmd_sql)
+    # returna True para continuar a digitar comandos
     return True
 
 
@@ -100,6 +95,7 @@ def cmd_favoritar(args, cursor, favorito):
     else:
         print("Contato foi retirado dos favoritos")
 
+    # retorna os sql para executar()
     return cmd_sql
 
 
@@ -124,6 +120,7 @@ def cmd_adicionar(args, cursor):
         cmd_insert = f"INSERT INTO grupos (descricao) VALUES ('{descricao}')"
         print("Grupo adicionado!")
 
+    # retorna os sql para executar()
     return cmd_insert
 
 
@@ -142,6 +139,7 @@ def cmd_apagar(args, cursor):
     except Exception:
         print("Confira se o id está correto!")
 
+    # retorna os sql para executar()
     return cmd_delete
 
 
@@ -149,7 +147,11 @@ def cmd_mudar(args, cursor):
     cmd_update = ""
     try:
         if args[0] == 'contato':
-            cmd_update = f"UPDATE contatos SET {args[2]} = '{args[3]}' WHERE id_contato = {args[1]}"
+            informacao = ""
+            palavras = range(len(args) - 3)
+            for i in palavras:
+                informacao += args[i + 3] if i == palavras else args[i + 3] + " "
+            cmd_update = f"UPDATE contatos SET {args[2]} = '{informacao}' WHERE id_contato = {args[1]}"
         elif args[0] == 'grupo':
             cmd_update = f"UPDATE grupos SET descricao = '{args[2]}' WHERE id_grupo = {args[1]}"
 
@@ -157,6 +159,7 @@ def cmd_mudar(args, cursor):
     except Exception:
         print("Não foi possível modificar as informações")
 
+    # retorna os sql para executar()
     return cmd_update
 
 
