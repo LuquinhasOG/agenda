@@ -54,7 +54,7 @@ Se quiser modificar as informações da agenda pode usar o comando 'mudar'. Para
 'mudar grupo id_grupo nova_descrição'. Para mudar informações dos contatos é mais complexo, pois precisa de saber o nome
 das colunas no Banco de Dados, que são: nome, email, ddd, telefone e id_grupo. Agora com essas informações, a estrutura
 do comando para modificar contatos é 'mudar contato id_contato nome_da_coluna nova_informação', onde a nova informação é
-novo valor que deseja colocar.
+novo valor que deseja colocar. (permite injeção de SQL)
 
 Os próximos comandos são mais simples, por serem usados apenas de uma forma.
 
